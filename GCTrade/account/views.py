@@ -1,40 +1,46 @@
+import json
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import auth
 
+from django.views import View
+from django.http import HttpResponse, JsonResponse
+from .models import Account
 
-# SignUp here
-def SignUp(request):
-    if request.method == 'POST':
-        if request.POST['password'] == request.POST['confirm']:
-            user = User.objects.create_user(username=request.POST['username'],
-            password=request.POST['password'])
 
-            auth.login(request, user)
-            return redirect('/')
 
-    return render(request, 'signup.html')
+class SignUpView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+        
+        if Account.objects.filter(email = data['email']).exists():
+             return HttpResponse(status=400)
+        Account.objects.create(
+           email = data['email'],
+           password = data['password']
+           )
+        return JsonResponse({'message': '회원가입 성공'},status=200)
 
-def Login(request):
-    if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = auth.authenticate(request, username=username, password=password)
+class SignInView(View):
+    def post(self, request):
+        data = json.loads(request.body)
 
-        if user is not None:
-            auth.login(request, user)
-            return redirect('/')
-        else:
-            return render(request, 'login.html', {'error' : 'username or password is incorrect.'})
-    else:
-        return render(request, 'login.html')
+        if Account.objects.filter(email = data['email']).exists() :
+            user = Account.objects.get(email = data['email'])
+            if user.password == data['password'] :
+                return JsonResponse({'message':f'{user.email}님 로그인 되셨습니다.'}, status=200)
+            else :
+                return JsonResponse({'message':'비밀번호가 틀렸어요'},status = 401)
 
-def Logout(request):
-    if request.method == 'POST':
-        auth.logout(request)
-        return redirect('/')
+        return JsonResponse({'message':'미등록 이메일 입니다.'},status=400)
 
-    return render(request, 'login.html')
+# def Logout(request):
+#     if request.method == 'POST':
+#         auth.logout(request)
+#         return redirect('/')
+
+#     return render(request, 'login.html')
 
 
 
