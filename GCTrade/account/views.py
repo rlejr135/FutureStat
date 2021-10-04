@@ -8,7 +8,7 @@ from django.views import View
 from django.http import HttpResponse, JsonResponse
 from .models import Account
 from django.views import generic
-
+from django.contrib.auth.hashers import make_password
 
 class SignUpView(View):
     def get(self, request):
@@ -16,25 +16,32 @@ class SignUpView(View):
 
 
     def post(self, request):
-        data = json.loads(request.body)
-        
-        if Account.objects.filter(email = data['email']).exists():
-            return HttpResponse(status=400)
+        username = request.POST.get('username', None)
+        email = request.POST.get('email', None)
+        password = request.POST.get('password', None)
+        re_password = request.POST.get('re_password', None)
+        res_data = {}
+        if not (username and email and password and re_password):
+            res_data['error'] = 'empty value detected'
+        elif Account.objects.filter(email = email).exists():
+            res_data['error'] = 'exist email'
 
-        if data['password'] != data['confirm']:
-            return HttpResponse(status=404)
+        elif password != re_password:
+            res_data['error'] = 'different password'
 
-        Account.objects.create(
-           email = data['email'],
-           password = data['password']
-           )
-        return JsonResponse({'message': '회원가입 성공'},status=200)
-
+        else:
+            new_account = Account(
+                email = email,
+                password = make_password(password),
+                username = username
+            )
+            new_account.save()
+        return render(request, 'account/signup.html', res_data)
 
 class SignInView(View):
     def get(self, request):
         return render(request, 'account/login.html')
-        
+
     def post(self, request):
         data = json.loads(request.body)
 
