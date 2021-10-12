@@ -54,6 +54,7 @@ class SignInView(View):
 
         return JsonResponse({'message':'미등록 이메일 입니다.'},status=400)
 
+
 # def Logout(request):
 #     if request.method == 'POST':
 #         auth.logout(request)
