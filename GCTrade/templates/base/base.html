@@ -19,10 +19,25 @@
     
 
 </head>
-<body><!-- 바디 영역 -->       
-
-            {% block content %}                 
-            {% endblock content %}
-
+<body>
+    <div class="container">
+        <div class="row">
+            {% include 'base/topbar.html' %}
+        </div>
+        <div class="row">
+            <div class="col-3">
+                {% include 'base/sidebar.html' %}
+            </div>
+            <div class="col">
+                <div class="b-example-divider"></div>
+            </div>
+            <div class="col-6">
+                {% block content %}                 
+                {% endblock content %}
+            </div>
+        </div>
+        
+    </div>
+    
 </body>
 </html>
