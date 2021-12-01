@@ -12,3 +12,9 @@ from django.views import generic
 class MainView(View):
     def get(self, request):
         return render(request, 'Home.html')
+
+
+
+class NoticeView(View):
+    def get(self, request):
+        return render(request, 'Notice.html')
